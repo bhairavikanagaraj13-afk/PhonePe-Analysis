@@ -1093,7 +1093,7 @@ elif menu=="Analysis":
             )
 
             #Transaction intensity across districts
-            q2 = """
+            q1 = """
             SELECT
                 district_name_t,
                 SUM(dis_t_count) AS total_txn
@@ -1101,18 +1101,18 @@ elif menu=="Analysis":
             WHERE state = %s
             GROUP BY district_name_t
             """
-            df2 = pd.read_sql(q2, conn, params=(selected_state,))
-            fig2 = px.histogram(
-                df2,
+            df1 = pd.read_sql(q1, conn, params=(selected_state,))
+            fig1 = px.histogram(
+                df1,
                 x="district_name_t",
                 y="total_txn",
                 nbins=20,
                 title=f"Transaction intensity across districts- {selected_state}"
             )
 
-            st.plotly_chart(fig2, use_container_width=True)
+            st.plotly_chart(fig1, use_container_width=True)
             #Transaction category dependency
-            q3 = """
+            q2 = """
             SELECT
                 transaction_type,
                 SUM(transaction_count) AS total_txn
@@ -1121,18 +1121,18 @@ elif menu=="Analysis":
             GROUP BY transaction_type
             ORDER BY total_txn DESC
             """
-            df3 = pd.read_sql(q3, conn, params=(selected_state,))
+            df2 = pd.read_sql(q2, conn, params=(selected_state,))
 
-            fig3 = px.pie(
-                df3,
+            fig2 = px.pie(
+                df2,
                 names="transaction_type",
                 values="total_txn",
                 hole=0.45,
                 title=f"Transaction category dependency - {selected_state}"
             )
-            st.plotly_chart(fig3, use_container_width=True)
+            st.plotly_chart(fig2, use_container_width=True)
             # emerging districts
-            q4 = """
+            q3 = """
             SELECT
                 district_name_t,
                 year,
@@ -1142,19 +1142,19 @@ elif menu=="Analysis":
             GROUP BY district_name_t, year
             ORDER BY district_name_t, year
             """
-            df4 = pd.read_sql(q4, conn, params=(selected_state,))
+            df3 = pd.read_sql(q3, conn, params=(selected_state,))
 
-            last_year = df4["year"].max()
+            last_year = df3["year"].max()
 
             top_d = (
-                df4[df4["year"] == last_year]
+                df3[df3["year"] == last_year]
                 .sort_values("total_txn", ascending=False)
                 .head(5)["district_name_t"]
             )
 
-            df4_plot = df4[df4["district_name_t"].isin(top_d)]
-            fig4 = px.line(
-            df4_plot,
+            df3_plot = df3[df3["district_name_t"].isin(top_d)]
+            fig3 = px.line(
+            df3_plot,
             x="year",
             y="total_txn",
             color="district_name_t",
@@ -1162,11 +1162,11 @@ elif menu=="Analysis":
             title=f"Emerging districts - yearly transaction growth- {selected_state}"
             )
 
-            st.plotly_chart(fig4, use_container_width=True)
+            st.plotly_chart(fig3, use_container_width=True)
 
             # high value low usauge
 
-            q5 = """
+            q4 = """
             SELECT
                 district_name_t,
                 SUM(dis_t_count) AS total_txn,
@@ -1176,23 +1176,23 @@ elif menu=="Analysis":
             WHERE state = %s
             GROUP BY district_name_t
             """
-            df5 = pd.read_sql(q5, conn, params=(selected_state,))
-            median_txn = df5["total_txn"].median()
-            df5_low = df5[df5["total_txn"] <= median_txn]
+            df4 = pd.read_sql(q4, conn, params=(selected_state,))
+            median_txn = df4["total_txn"].median()
+            df4_low = df4[df4["total_txn"] <= median_txn]
 
-            df5_top = df5_low.sort_values("avg_value", ascending=False).head(5)
-            fig5 = px.bar(
-                df5_top,
+            df4_top = df4_low.sort_values("avg_value", ascending=False).head(5)
+            fig4 = px.bar(
+                df4_top,
                 x="district_name_t",
                 y="avg_value",
                 title=f"High value but low usage districts- {selected_state}"
             )
 
-            st.plotly_chart(fig5, use_container_width=True)
+            st.plotly_chart(fig4, use_container_width=True)
 
             #quarter wise
 
-            q7 = """
+            q5 = """
             SELECT
                 quarter,
                 SUM(transaction_count) AS total_txn
@@ -1201,14 +1201,14 @@ elif menu=="Analysis":
             GROUP BY quarter
             ORDER BY quarter
             """
-            df7 = pd.read_sql(q7, conn, params=(selected_state,))
-            fig7 = px.bar(
-            df7,
+            df5 = pd.read_sql(q5, conn, params=(selected_state,))
+            fig5 = px.bar(
+            df5,
             x="quarter",
             y="total_txn",
             title=f"Quarter-wise transaction seasonal- {selected_state}"
             )
-            st.plotly_chart(fig7, use_container_width=True)
+            st.plotly_chart(fig5, use_container_width=True)
 
             ##User Engagement and Growth Strategy
 
